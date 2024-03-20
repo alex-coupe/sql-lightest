@@ -8,8 +8,8 @@ namespace SqlLightest
 {
     public class IOController
     {
-        private readonly bool dbLoaded = false;
         private bool programRunning = true;
+        private string selectedDB = "";
 
         public void HandleInputOutput()
         {
@@ -18,29 +18,34 @@ namespace SqlLightest
             {
                 Console.Write("> ");
                 var commandString = Console.ReadLine();
-                var tokens = Tokenize(commandString);
-                var res = SqlEngine.Execute(tokens);
-                HandleResults(res);
+                var tokens = Tokenizer.Tokenize(commandString);
+                if (tokens.Length > 0) { 
+                var syntaxTree = SyntaxTreeBuilder.Process(tokens);
+                    switch (syntaxTree.Root.Value.ToUpper())
+                    {
+                        case "EXIT":
+                            programRunning = false;
+                            break;
+                        case "UNKNOWN":
+                            Console.WriteLine("Unknown Command");
+                            break;
+                        case "USE":
+                            var db = syntaxTree.Root.Children[0].Value;
+                            if (File.Exists($"{db}.db"))
+                            {
+                                selectedDB = db;
+                                Console.WriteLine($"Database set to {db}");
+                            }
+                            else
+                                Console.WriteLine("Database does not exist");
+                            break;
+                        default:
+                            var result = SqlEngine.Execute(syntaxTree, selectedDB);
+                            ResultFormatter.Print(result);
+                            break;
+                    }
+                }
             }
-        }
-
-        private void HandleResults(int res)
-        {
-            if (res == 0)
-            {
-                programRunning = false;
-            }
-            else
-            {
-                Console.WriteLine("Unknown Command");
-            }
-        }
-
-        private string[] Tokenize(string? input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return [];
-            return input.Trim().Split(';');
         }
     }
 }

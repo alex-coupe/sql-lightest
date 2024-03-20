@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SqlLightest.SQLProcessors;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,12 +9,19 @@ namespace SqlLightest
 {
     public class SqlEngine
     {
-       public static int Execute(string[] tokens)
+        public static SQLResult Execute(Tree<string> syntaxTree, string selectedDB)
         {
-            return tokens[0].ToUpper() switch
+            var sqlResult = new SQLResult();
+            if (string.IsNullOrEmpty(selectedDB) && syntaxTree.Root.Value != "CREATE")
             {
-                "EXIT" => 0,
-                _ => 1,
+                sqlResult.Message = "No Database Selected";
+                return sqlResult;
+            }
+
+            return syntaxTree.Root.Value switch
+            {
+                "CREATE" => new CreateStatementProcessor().Process(syntaxTree),
+                _ => sqlResult,
             };
         }
     }
