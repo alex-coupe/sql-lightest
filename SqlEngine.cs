@@ -11,8 +11,12 @@ namespace SqlLightest
     {
         public static SQLResult Execute(Tree<string> syntaxTree, string selectedDB)
         {
-            var sqlResult = new SQLResult();
-            if (string.IsNullOrEmpty(selectedDB) && syntaxTree.Root.Value != "CREATE")
+
+            var sqlResult = new SQLResult
+            {
+                Message = "Not Implemented"
+            };
+            if (string.IsNullOrEmpty(selectedDB) && !syntaxTree.Root.Children[0].Value.Equals("DATABASE", StringComparison.CurrentCultureIgnoreCase))
             {
                 sqlResult.Message = "No Database Selected";
                 return sqlResult;
@@ -21,6 +25,7 @@ namespace SqlLightest
             return syntaxTree.Root.Value switch
             {
                 "CREATE" => new CreateStatementProcessor().Process(syntaxTree),
+                "DROP" => new DropStatementProcessor().Process(syntaxTree),
                 _ => sqlResult,
             };
         }
