@@ -1,4 +1,5 @@
 ﻿using SqlLightest.SQLProcessors;
+using SqlLightest.SyntaxNodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,25 +10,21 @@ namespace SqlLightest
 {
     public class SqlEngine
     {
-        public static SQLResult Execute(Tree<string> syntaxTree, string selectedDB)
+        public static SQLResult ExecuteCreateDatabaseQuery(CreateDatabaseNode node)
         {
-
-            var sqlResult = new SQLResult
-            {
-                Message = "Not Implemented"
-            };
-            if (string.IsNullOrEmpty(selectedDB) && !syntaxTree.Root.Children[0].Value.Equals("DATABASE", StringComparison.CurrentCultureIgnoreCase))
-            {
-                sqlResult.Message = "No Database Selected";
-                return sqlResult;
-            }
-
-            return syntaxTree.Root.Value switch
-            {
-                "CREATE" => new CreateStatementProcessor().Process(syntaxTree),
-                "DROP" => new DropStatementProcessor().Process(syntaxTree),
-                _ => sqlResult,
-            };
+            return CreateStatementProcessor.ProcessCreateDatabase(node);
         }
+
+        public static SQLResult ExecuteDropDatabaseQuery(DropDatabaseNode node)
+        {
+            return DropStatementProcessor.ProcessDropDatabase(node);
+        }
+
+        public static SQLResult ExecuteCreateTableQuery(CreateTableNode node, string database) 
+        { 
+            return CreateStatementProcessor.ProcessCreateTable(node, database);
+        }
+
+
     }
 }

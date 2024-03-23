@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SqlLightest.SyntaxNodes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,82 +9,159 @@ namespace SqlLightest
 {
     public class SyntaxTreeBuilder
     {
-        public static Tree<string> Process(string[] tokens)
+        private static string[] DataTypes = ["INT", "VARCHAR", "BIGINT","BOOL","DATETIME","CHAR", "FLOAT"];
+        private static string[] Constraints = ["PRIMARY", "FOREIGN", "NULLABLE", "UNIQUE"];
+        
+        public static CreateDatabaseNode BuildCreateDatabaseNode(string[] tokens) 
         {
-            return tokens[0].ToUpper() switch
-            {
-                "SELECT" => ProcessSelectStatement(tokens),
-                "USE" => ProcessUseStatement(tokens),
-                "EXIT" => new Tree<string>("EXIT"),
-                "CREATE" => ProcessCreateStatement(tokens),
-                "DROP" => ProcessDropStatement(tokens),
-                _ => new Tree<string>("UNKNOWN"),
-            } ;
-        }
-
-        private static Tree<string> ProcessCreateStatement(string[] tokens) 
-        {
-            var syntaxTree = new Tree<string>(tokens[0].ToUpper());
-
             if (tokens.Length < 3) 
             {
-                Console.WriteLine("Invalid Create Statement");
+                Console.WriteLine("Name is required");
+                return new CreateDatabaseNode("");
             }
-
-            if (tokens.Length == 3) 
-            {
-                syntaxTree.Root.Children.Add(new TreeNode<string>(tokens[1]));
-                syntaxTree.Root.Children[0].Children.Add(new TreeNode<string>(tokens[2]));
-            }
-
-            return syntaxTree;
+            return new CreateDatabaseNode(tokens[2]);
         }
 
-        private static Tree<string> ProcessDropStatement(string[] tokens)
+        public static DropDatabaseNode BuildDropDatabaseNode(string[] tokens)
         {
-            var syntaxTree = new Tree<string>(tokens[0].ToUpper());
-
             if (tokens.Length < 3)
             {
-                Console.WriteLine("Invalid Drop Statement");
+                Console.WriteLine("Name is required");
+                return new DropDatabaseNode("");
             }
-
-            if (tokens.Length == 3)
-            {
-                syntaxTree.Root.Children.Add(new TreeNode<string>(tokens[1]));
-                syntaxTree.Root.Children[0].Children.Add(new TreeNode<string>(tokens[2]));
-            }
-
-            return syntaxTree;
+            return new DropDatabaseNode(tokens[2]);
         }
 
-        private static Tree<string> ProcessUseStatement(string[] tokens)
+        public static CreateTableNode BuildCreateTableNode(string[] tokens)
         {
-            var synxtaxTree = new Tree<string>(tokens[0].ToUpper());
-            if (tokens.Length < 2)
+            var node = new CreateTableNode("");
+            if (tokens.Length < 7)
             {
-                Console.WriteLine("Use Command Requires Database Name");
+                Console.WriteLine("Invalid Create Table Statement");
+                return node;
             }
-            else
+
+            node.Name = tokens[2];
+
+            var tokensList = tokens.ToList();
+
+            int start = tokensList.IndexOf("(");
+
+            if (start == -1)
             {
-                synxtaxTree.Root.Children.Add(new TreeNode<string>(tokens[1]));
+                Console.WriteLine("Missing (");
+                return node;
             }
-            return synxtaxTree;
+            start++;
+            int end = tokensList.IndexOf(";");
+            if (end == -1)
+            {
+                Console.WriteLine("Missing ;");
+                return node;
+            }
+            end--;
+            
+            while(start < end)
+            {
+                var col = new Column(tokensList.ElementAt(start++), tokensList.ElementAt(start++));
+                if (!CheckValidDataType(col.DataType))
+                {
+                    Console.WriteLine($"Syntax Error near {tokensList.ElementAt(start--)}");
+                    return node;
+                }
+
+                if (col.DataType == "VARCHAR")
+                {
+                    start++;
+                    col.DataTypeSize = tokensList.ElementAt(start++);
+                    start++;
+                }
+                
+                if (tokensList.ElementAt(start) == ",")
+                {
+                    start++;
+                }
+                else
+                {
+                    while (tokensList.ElementAt(start) != "," && tokensList.ElementAt(start) != ")")
+                    {
+                        if (!CheckValidConstraints(tokensList.ElementAt(start)))
+                        {
+                            Console.WriteLine($"Syntax Error near {tokensList.ElementAt(start)}");
+                            return node;
+                        }
+                        if (tokensList.ElementAt(start) == "UNIQUE")
+                        {
+                            col.IsUnique = true;
+                            start++;
+                        }
+
+                        if (tokensList.ElementAt(start) == "NULLABLE")
+                        {
+                            col.IsNullable = true;
+                            start++;
+                        }
+
+                        if (tokensList.ElementAt(start) == "PRIMARY")
+                        {
+                            var peek = start;
+                            peek++;
+                            if (tokensList.ElementAt(peek) == "KEY")
+                            {
+                                if (col.IsNullable)
+                                {
+                                    Console.WriteLine("Cannot have nullable primary key");
+                                    return node;
+                                }
+                                col.IsPrimaryKey = true;
+                                start+=2;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Syntax Error near PRIMARY");
+                                return node;
+                            }
+                        }
+
+                        if (tokensList.ElementAt(start) == "FOREIGN")
+                        {
+                            var peek = start;
+                            peek++;
+                            if (tokensList.ElementAt(peek) == "KEY")
+                            {
+                                if (col.IsNullable)
+                                {
+                                    Console.WriteLine("Cannot have nullable foreign key");
+                                    return node;
+                                }
+                                col.IsForeignKey = true;
+                                start+=2;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Syntax Error near FOREIGN");
+                                return node;
+                            }
+                        }
+                    }
+                    if (start < end)
+                        start++;
+                }
+                node.Columns.Add(col);
+            }         
+            return node;
         }
 
-        private static Tree<string> ProcessSelectStatement(string[] tokens)
+        private static bool CheckValidDataType(string dataType)
         {
-            var synxtaxTree = new Tree<string>(tokens[0].ToUpper());
-            var columnsNode = new TreeNode<string>("COLUMNS");
-            var fromNode = new TreeNode<string>("FROM");
-            fromNode.Children.Add(new TreeNode<string>(tokens[3]));
-            foreach (var col in tokens[1].Split(','))
-            {
-                columnsNode.Children.Add(new TreeNode<string>(col.Trim()));
-            }
-            synxtaxTree.Root.Children.Add(columnsNode);
-            synxtaxTree.Root.Children.Add(fromNode);
-            return synxtaxTree;
+            if (DataTypes.Contains(dataType)) return true;
+            return false;
+        }
+
+        private static bool CheckValidConstraints(string constraint)
+        {
+            if (Constraints.Contains(constraint)) return true;
+            return false;
         }
     }
 }
