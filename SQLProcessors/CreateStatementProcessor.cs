@@ -12,10 +12,10 @@ namespace SqlLightest.SQLProcessors
         public static SQLResult ProcessCreateDatabase(CreateDatabaseNode node)
         {
             var result = new SQLResult();
-            var filename = $"{node.Name}.db";
+            var filename = $"{node.Name.ToLower()}.db";
             if (!File.Exists(filename))
             {
-                File.Create(filename);
+                using (File.Create(filename))
                 if (File.Exists(filename))
                 {
                     result.Message = "Database Created Successfully";
@@ -38,43 +38,44 @@ namespace SqlLightest.SQLProcessors
             try
             {
                 var path = $"{database}.db";
-                var lines = File.ReadAllLines(path);
-                
-                for (int i = 0;i< lines.Length; i++)
+                var lines = File.ReadAllLines(path).ToList();
+                var index = 0;
+                for (int i = 0;i< lines.Count; i++)
                 {
                     if (lines[i] == $"[Table {node.Name}]")
                     {
                         result.Message = "Table already exists";
                         return result;
                     }
+
+                    if (lines[i] == "")
+                    {
+                        index = i; 
+                        break;
+                    }
                 }
 
-                using (FileStream fs = new(path, FileMode.Append, FileAccess.Write))
+                lines.Insert(index++, $"[Table {node.Name}]");
+                lines.Insert(index++, $"Cols: {node.Columns.Count}");
+                foreach (var col in node.Columns)
                 {
-                    
-                    using (StreamWriter writer = new(fs))
-                    {
-                        writer.WriteLine($"[Table {node.Name}]");
-                        writer.WriteLine($"Col Count: {node.Columns.Count}");
-                        foreach (var col in node.Columns)
-                        {
-                            var sb = new StringBuilder();
-                            sb.Append($"{col.Name} | {col.DataType}");
-                            if (!string.IsNullOrEmpty(col.DataTypeSize))
-                                sb.Append($"-{col.DataTypeSize}");
-                            if (col.IsPrimaryKey) sb.Append("| PrimaryKey: True");
-                            if (col.IsForeignKey) sb.Append("| ForeignKey: True");
-                            if (col.IsUnique) sb.Append("| Unique: True");
-                            if (col.IsNullable) sb.Append("| Nullable: True");
-                            if (!string.IsNullOrEmpty(col.DefaultValue)) sb.Append($"| Default: {col.DefaultValue}");
-                            writer.WriteLine(sb.ToString());
-                        }
-                                             
-                    };
-                };
+                    var sb = new StringBuilder();
+                    sb.Append($"{col.Name} | {col.DataType}");
+                    if (!string.IsNullOrEmpty(col.DataTypeSize))
+                        sb.Append($"-{col.DataTypeSize}");
+                    if (col.IsPrimaryKey) sb.Append("| PrimaryKey: True");
+                    if (col.IsForeignKey) sb.Append("| ForeignKey: True");
+                    if (col.IsUnique) sb.Append("| Unique: True");
+                    if (col.IsNullable) sb.Append("| Nullable: True");
+                    if (!string.IsNullOrEmpty(col.DefaultValue)) sb.Append($"| Default: {col.DefaultValue}");
+                    lines.Insert(index++,sb.ToString());
+                    lines.Insert(index, Environment.NewLine);
+                }
+                File.WriteAllLines(path, lines);
                 result.Message = "Table Created Successfully";
+                
             }
-            catch(FileLoadException ex)
+            catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }

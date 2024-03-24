@@ -34,6 +34,39 @@ namespace SqlLightest.SQLProcessors
 
             return result;
         }
-       
+
+        public static SQLResult ProcessDropTable(DropTableNode node, string database)
+        {
+            var filename = $"{database}.db";
+            var result = new SQLResult();
+
+            if (File.Exists(filename))
+            {
+
+                try
+                {
+                    var lines = File.ReadAllLines(filename).ToList();
+                    var indexToDelete = lines.IndexOf($"[Table {node.Name}]");
+                    if (indexToDelete == -1)
+                    {
+                        result.Message = "Table does not exist";
+                        return result;
+                    }
+                    lines.RemoveAt(indexToDelete);
+                    while (!lines.ElementAt(indexToDelete).StartsWith("[Table") && lines.ElementAt(indexToDelete) != "")
+                    {
+                        lines.RemoveAt(indexToDelete);
+                    }
+
+                    File.WriteAllLines(filename, lines);
+                    result.Message = "Table Dropped Successfully";
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+            return result;
+        }
     }
 }

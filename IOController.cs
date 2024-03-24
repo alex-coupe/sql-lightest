@@ -42,14 +42,14 @@ namespace SqlLightest
                     switch (tokens[0])
                     {
                         case "SELECT":
-                            
                             break;
                         case "INSERT":
-                           
                             break;
                         case "UPDATE":
                             break;
                         case "DELETE":
+                            break;
+                        case "ALTER":
                             break;
                         case "DROP":
                             if (tokens[1] == "DATABASE")
@@ -63,7 +63,12 @@ namespace SqlLightest
                             }
                             else if (tokens[1] == "TABLE")
                             {
-
+                                var node = SyntaxTreeBuilder.BuildDropTableNode(tokens);
+                                if (!string.IsNullOrEmpty(node.Name))
+                                {
+                                    var res = SqlEngine.ExecuteDropTableQuery(node,selectedDB);
+                                    ResultFormatter.Print(res);
+                                }
                             }
                             else
                                 Console.WriteLine("Unknown Drop Command");

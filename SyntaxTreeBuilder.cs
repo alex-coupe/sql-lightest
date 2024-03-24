@@ -9,14 +9,19 @@ namespace SqlLightest
 {
     public class SyntaxTreeBuilder
     {
-        private static string[] DataTypes = ["INT", "VARCHAR", "BIGINT","BOOL","DATETIME","CHAR", "FLOAT"];
-        private static string[] Constraints = ["PRIMARY", "FOREIGN", "NULLABLE", "UNIQUE"];
+        private static readonly string[] DataTypes = ["INT", "VARCHAR", "BIGINT","BOOL","DATETIME","CHAR", "FLOAT"];
+        private static readonly string[] Constraints = ["PRIMARY", "FOREIGN", "NULLABLE", "UNIQUE", "DEFAULT"];
         
         public static CreateDatabaseNode BuildCreateDatabaseNode(string[] tokens) 
         {
             if (tokens.Length < 3) 
             {
                 Console.WriteLine("Name is required");
+                return new CreateDatabaseNode("");
+            }
+            if (tokens.Length > 3) 
+            {
+                Console.WriteLine("Invalid syntax");
                 return new CreateDatabaseNode("");
             }
             return new CreateDatabaseNode(tokens[2]);
@@ -30,6 +35,16 @@ namespace SqlLightest
                 return new DropDatabaseNode("");
             }
             return new DropDatabaseNode(tokens[2]);
+        }
+
+        public static DropTableNode BuildDropTableNode(string[] tokens)
+        {
+            if (tokens.Length < 3)
+            {
+                Console.WriteLine("Name is required");
+                return new DropTableNode("");
+            }
+            return new DropTableNode(tokens[2]);
         }
 
         public static CreateTableNode BuildCreateTableNode(string[] tokens)
@@ -99,6 +114,13 @@ namespace SqlLightest
                         if (tokensList.ElementAt(start) == "NULLABLE")
                         {
                             col.IsNullable = true;
+                            start++;
+                        }
+
+                        if (tokensList.ElementAt(start) == "DEFAULT")
+                        {
+                            start+=2;
+                            col.DefaultValue = tokensList.ElementAt(start++);
                             start++;
                         }
 

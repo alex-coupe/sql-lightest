@@ -25,6 +25,11 @@ namespace SqlLightest
             return CreateStatementProcessor.ProcessCreateTable(node, database);
         }
 
+        public static SQLResult ExecuteDropTableQuery(DropTableNode node,string database)
+        {
+            return DropStatementProcessor.ProcessDropTable(node,database);
+        }
+
 
     }
 }

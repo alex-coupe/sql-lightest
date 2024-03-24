@@ -9,7 +9,7 @@ namespace SqlLightest
 {
     public class Tokenizer
     {
-        private static readonly char[] SpecialCharacters = [',',';','(',')'];
+        private static readonly char[] SpecialCharacters = [',',';','(',')','\''];
         private static bool ContainsSpecialCharacter(string token)
         {
             foreach (char c in SpecialCharacters)
