@@ -1,55 +1,26 @@
 ﻿using SqlLightest.SyntaxNodes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SqlLightest
+namespace SqlLightest.SyntaxTreeBuilders
 {
-    public class SyntaxTreeBuilder
+    public class CreateSyntaxTreeBuilder
     {
-        private static readonly string[] DataTypes = ["INT", "VARCHAR", "BIGINT","BOOL","DATETIME","CHAR", "FLOAT"];
-        private static readonly string[] Constraints = ["PRIMARY", "FOREIGN", "NULLABLE", "UNIQUE", "DEFAULT"];
-        
-        public static CreateDatabaseNode BuildCreateDatabaseNode(string[] tokens) 
+        public static CreateNode? BuildCreateNode(string[] tokens)
         {
-            if (tokens.Length < 3) 
-            {
-                Console.WriteLine("Name is required");
-                return new CreateDatabaseNode("");
-            }
-            if (tokens.Length > 3) 
-            {
-                Console.WriteLine("Invalid syntax");
-                return new CreateDatabaseNode("");
-            }
-            return new CreateDatabaseNode(tokens[2]);
+            if (tokens[1].ToUpper() == "DATABASE")
+                return BuildCreateDatabaseNode(tokens);
+
+            return null;
         }
 
-        public static DropDatabaseNode BuildDropDatabaseNode(string[] tokens)
+        private static CreateNode BuildCreateTableNode(string[] tokens)
         {
-            if (tokens.Length < 3)
-            {
-                Console.WriteLine("Name is required");
-                return new DropDatabaseNode("");
-            }
-            return new DropDatabaseNode(tokens[2]);
-        }
-
-        public static DropTableNode BuildDropTableNode(string[] tokens)
-        {
-            if (tokens.Length < 3)
-            {
-                Console.WriteLine("Name is required");
-                return new DropTableNode("");
-            }
-            return new DropTableNode(tokens[2]);
-        }
-
-        public static CreateTableNode BuildCreateTableNode(string[] tokens)
-        {
-            var node = new CreateTableNode("");
+            var node = new CreateNode("");
             if (tokens.Length < 7)
             {
                 Console.WriteLine("Invalid Create Table Statement");
@@ -75,8 +46,8 @@ namespace SqlLightest
                 return node;
             }
             end--;
-            
-            while(start < end)
+
+            while (start < end)
             {
                 var col = new Column(tokensList.ElementAt(start++), tokensList.ElementAt(start++));
                 if (!CheckValidDataType(col.DataType))
@@ -91,7 +62,7 @@ namespace SqlLightest
                     col.DataTypeSize = tokensList.ElementAt(start++);
                     start++;
                 }
-                
+
                 if (tokensList.ElementAt(start) == ",")
                 {
                     start++;
@@ -119,7 +90,7 @@ namespace SqlLightest
 
                         if (tokensList.ElementAt(start) == "DEFAULT")
                         {
-                            start+=2;
+                            start += 2;
                             col.DefaultValue = tokensList.ElementAt(start++);
                             start++;
                         }
@@ -136,7 +107,7 @@ namespace SqlLightest
                                     return node;
                                 }
                                 col.IsPrimaryKey = true;
-                                start+=2;
+                                start += 2;
                             }
                             else
                             {
@@ -157,7 +128,7 @@ namespace SqlLightest
                                     return node;
                                 }
                                 col.IsForeignKey = true;
-                                start+=2;
+                                start += 2;
                             }
                             else
                             {
@@ -170,19 +141,29 @@ namespace SqlLightest
                         start++;
                 }
                 node.Columns.Add(col);
-            }         
+            }
             return node;
+        }
+        private static CreateNode? BuildCreateDatabaseNode(string[] tokens)
+        {
+            var validator = SyntaxValidator.ValidateCreateCommand(tokens);
+            if (validator.IsValid)
+                return new CreateNode(tokens[2]);
+
+            Console.WriteLine(validator.Message);
+
+            return null;
         }
 
         private static bool CheckValidDataType(string dataType)
         {
-            if (DataTypes.Contains(dataType)) return true;
+            if (Constants.DataTypes.Contains(dataType)) return true;
             return false;
         }
 
         private static bool CheckValidConstraints(string constraint)
         {
-            if (Constraints.Contains(constraint)) return true;
+            if (Constants.Constraints.Contains(constraint)) return true;
             return false;
         }
     }

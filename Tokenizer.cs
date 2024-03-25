@@ -62,8 +62,7 @@ namespace SqlLightest
                     result.Add(token);
                 }
             }
-            result = result.ConvertAll(d => d.ToUpper());
-
+           
             return [.. result];
 
         }

@@ -3,7 +3,7 @@
     internal class Program
     {
         // TODO
-        // 1.CREATE/DROP Tables
+        // 1.Syntax/statement validator
         // 2.INSERT
         // 3.SELECT (conditions and aggregates)
         // 4.UPDATE

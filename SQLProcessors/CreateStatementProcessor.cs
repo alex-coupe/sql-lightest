@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,11 +10,32 @@ namespace SqlLightest.SQLProcessors
 {
     public class CreateStatementProcessor
     {
-        public static SQLResult ProcessCreateDatabase(CreateDatabaseNode node)
+        private static ValidationResult ValidateCreateDatabaseQuery(string filename)
+        {
+            var res = new ValidationResult();
+            if (!File.Exists(filename))
+                res.IsValid = true;
+            else
+                res.Message = "Database Already Exists";
+                
+            return res;
+        }
+
+        public static SQLResult ProcessCreateCommand(CreateNode node, string database)
+        {
+            if (string.IsNullOrEmpty(database))
+                return ProcessCreateDatabase(node);
+
+            else
+                return ProcessCreateTable(node, database);
+        }
+
+        private static SQLResult ProcessCreateDatabase(CreateNode node)
         {
             var result = new SQLResult();
             var filename = $"{node.Name.ToLower()}.db";
-            if (!File.Exists(filename))
+            var validateQuery = ValidateCreateDatabaseQuery(filename);
+            if (validateQuery.IsValid)
             {
                 using (File.Create(filename))
                 if (File.Exists(filename))
@@ -26,12 +48,12 @@ namespace SqlLightest.SQLProcessors
             }
             else
             {
-                result.Message = "Database Already Exists"; 
+                result.Message = validateQuery.Message; 
             }
             return result;
         }
 
-        public static SQLResult ProcessCreateTable(CreateTableNode node, string database)
+        private static SQLResult ProcessCreateTable(CreateNode node, string database)
         {
             var result = new SQLResult();
 
@@ -63,11 +85,11 @@ namespace SqlLightest.SQLProcessors
                     sb.Append($"{col.Name} | {col.DataType}");
                     if (!string.IsNullOrEmpty(col.DataTypeSize))
                         sb.Append($"-{col.DataTypeSize}");
-                    if (col.IsPrimaryKey) sb.Append("| PrimaryKey: True");
-                    if (col.IsForeignKey) sb.Append("| ForeignKey: True");
-                    if (col.IsUnique) sb.Append("| Unique: True");
-                    if (col.IsNullable) sb.Append("| Nullable: True");
-                    if (!string.IsNullOrEmpty(col.DefaultValue)) sb.Append($"| Default: {col.DefaultValue}");
+                    if (col.IsPrimaryKey) sb.Append(" | PrimaryKey: True");
+                    if (col.IsForeignKey) sb.Append(" | ForeignKey: True");
+                    if (col.IsUnique) sb.Append(" | Unique: True");
+                    if (col.IsNullable) sb.Append(" | Nullable: True");
+                    if (!string.IsNullOrEmpty(col.DefaultValue)) sb.Append($" | Default: {col.DefaultValue}");
                     lines.Insert(index++,sb.ToString());
                     lines.Insert(index, Environment.NewLine);
                 }

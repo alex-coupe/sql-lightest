@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SqlLightest.SyntaxNodes
 {
-    public class DropTableNode(string name)
+    public class DropNode(string name)
     {
         public string Name { get; set; } = name;
     }

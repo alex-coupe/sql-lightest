@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SqlLightest.SyntaxNodes
 {
-    public class UseDatabaseNode(string name)
+    public class UseNode(string name)
     {
         public string Name { get; set; } = name;     
     }

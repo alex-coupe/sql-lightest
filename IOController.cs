@@ -10,20 +10,7 @@ namespace SqlLightest
     public class IOController
     {
         private bool programRunning = true;
-        private string selectedDB = "";
-
-        private void SetSelectedDB(UseDatabaseNode node)
-        {
-            var db = node.Name;
-            if (!string.IsNullOrEmpty(db) && File.Exists($"{db}.db"))
-            {
-                this.selectedDB = db;
-                Console.WriteLine($"Database set to {db}");
-            }
-            else
-                Console.WriteLine("Database does not exist");
-        }
-
+        
         public void HandleInputOutput()
         {
             Console.WriteLine("Welcome to SQLightest");
@@ -34,16 +21,20 @@ namespace SqlLightest
                 var tokens = Tokenizer.Tokenize(commandString);
                 if (tokens.Length > 0) 
                 { 
-                    if (tokens[0] == "EXIT")
+                    if (tokens[0].Equals("EXIT", StringComparison.CurrentCultureIgnoreCase))
                     {
                         programRunning = false;
                         break;
                     }
-                    switch (tokens[0])
+
+                    SQLResult res;
+                    switch (tokens[0].ToUpper())
                     {
                         case "SELECT":
                             break;
                         case "INSERT":
+                                res = SqlEngine.ExecuteInsertQuery(tokens);
+                                ResultFormatter.Print(res);
                             break;
                         case "UPDATE":
                             break;
@@ -52,56 +43,21 @@ namespace SqlLightest
                         case "ALTER":
                             break;
                         case "DROP":
-                            if (tokens[1] == "DATABASE")
-                            {
-                                var node = SyntaxTreeBuilder.BuildDropDatabaseNode(tokens);
-                                if (!string.IsNullOrEmpty(node.Name))
-                                {
-                                    var res = SqlEngine.ExecuteDropDatabaseQuery(node);
-                                    ResultFormatter.Print(res);
-                                }
-                            }
-                            else if (tokens[1] == "TABLE")
-                            {
-                                var node = SyntaxTreeBuilder.BuildDropTableNode(tokens);
-                                if (!string.IsNullOrEmpty(node.Name))
-                                {
-                                    var res = SqlEngine.ExecuteDropTableQuery(node,selectedDB);
-                                    ResultFormatter.Print(res);
-                                }
-                            }
-                            else
-                                Console.WriteLine("Unknown Drop Command");
+                            res = SqlEngine.ExecuteDropQuery(tokens);
+                            ResultFormatter.Print(res);
                             break;
                         case "CREATE":
-                            if (tokens[1] == "DATABASE")
-                            {
-                                var createDBNode = SyntaxTreeBuilder.BuildCreateDatabaseNode(tokens);
-                                if (!string.IsNullOrEmpty(createDBNode.Name))
-                                {
-                                    var res = SqlEngine.ExecuteCreateDatabaseQuery(createDBNode);
-                                    ResultFormatter.Print(res);
-                                }
-                            }
-                            else if (!string.IsNullOrEmpty(selectedDB) && tokens[1] == "TABLE")
-                            {
-                                var createTableNode = SyntaxTreeBuilder.BuildCreateTableNode(tokens);
-                                if (!string.IsNullOrEmpty(createTableNode.Name))
-                                {
-                                    var res = SqlEngine.ExecuteCreateTableQuery(createTableNode,selectedDB);
-                                    ResultFormatter.Print(res);
-                                }
-                            }
-                            else
-                                Console.WriteLine("Unknown Create Command");
+                            res = SqlEngine.ExecuteCreateQuery(tokens);
+                            ResultFormatter.Print(res);
                             break;
                         case "USE":
-                            SetSelectedDB(new UseDatabaseNode(tokens[1]));
+                            res = SqlEngine.ExecuteUseQuery(tokens);
+                            ResultFormatter.Print(res);
                             break;
                         default:
                             Console.WriteLine("Unknown Command");
                             break;
-                            
+
                     }
                 }
             }

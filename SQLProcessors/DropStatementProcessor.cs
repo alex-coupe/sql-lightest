@@ -9,7 +9,16 @@ namespace SqlLightest.SQLProcessors
 {
     public class DropStatementProcessor
     {
-        public static SQLResult ProcessDropDatabase(DropDatabaseNode node)
+        public static SQLResult ProcessDropCommand(DropNode node, string selectedDB)
+        {
+            if (string.IsNullOrEmpty(selectedDB))
+                return ProcessDropDatabase(node);
+
+            else
+                return ProcessDropTable(node, selectedDB);
+        }
+
+        private static SQLResult ProcessDropDatabase(DropNode node)
         {
             var filename = $"{node.Name}.db";
             var result = new SQLResult();
@@ -35,7 +44,7 @@ namespace SqlLightest.SQLProcessors
             return result;
         }
 
-        public static SQLResult ProcessDropTable(DropTableNode node, string database)
+        private static SQLResult ProcessDropTable(DropNode node, string database)
         {
             var filename = $"{database}.db";
             var result = new SQLResult();
