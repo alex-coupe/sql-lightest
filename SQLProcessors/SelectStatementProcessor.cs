@@ -12,7 +12,7 @@ namespace SqlLightest.SQLProcessors
     {
         public static SQLResult Process(SelectNode selectNode, string database)
         {
-            SQLResult result = new SQLResult();
+            SQLResult result = new();
             try
             {
                 var path = $"{database}.db";

@@ -118,5 +118,12 @@ namespace SqlLightest
 
             return result;
         }
+
+        public static ValidationResult ValidateDeleteCommand(string[] tokens)
+        {
+            ValidationResult result = new() { IsValid = true };
+
+            return result;
+        }
     }
 }

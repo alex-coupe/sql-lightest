@@ -97,7 +97,7 @@ namespace SqlLightest
             return res;
         }
 
-        internal static SQLResult ExecuteSelectQuery(string[] tokens)
+        public static SQLResult ExecuteSelectQuery(string[] tokens)
         {
             var res = new SQLResult();
             var validator = SyntaxValidator.ValidateSelectCommand(tokens);
@@ -116,6 +116,26 @@ namespace SqlLightest
             {
                 res.Message = validator.Message;
             }
+            return res;
+        }
+
+        public static SQLResult ExecuteDeleteQuery(string[] tokens)
+        {
+            var res = new SQLResult();
+            var validator = SyntaxValidator.ValidateDeleteCommand(tokens);
+            if (validator.IsValid)
+            {
+                var node = DeleteSyntaxTreeBuilder.BuildDeleteNode(tokens);
+                if (node != null)
+                {
+                    res = DeleteStatementProcessor.ProcessDeleteCommand(node, selectedDB);
+                }
+            }
+            else
+            {
+                res.Message = validator.Message;
+            }
+
             return res;
         }
     }

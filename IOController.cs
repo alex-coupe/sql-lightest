@@ -41,6 +41,8 @@ namespace SqlLightest
                         case "UPDATE":
                             break;
                         case "DELETE":
+                            res = SqlEngine.ExecuteDeleteQuery(tokens);
+                            ResultFormatter.Print(res);
                             break;
                         case "ALTER":
                             break;

@@ -23,8 +23,9 @@ namespace SqlLightest.SQLProcessors
                     result.Message = "Table Does Not Exist";
                     return result;
                 }
-                var colCount = int.Parse(lines.ElementAt(++tableEntryIndex)[6..]);
-                if (colCount != node.Values.Length ) 
+                var table = Utilities.LoadTableDef(lines, node.Table.ToUpper());
+                
+                if (table.Columns.Count != node.Values.Length ) 
                 {
                     result.Message = "Values to Columns Mismatch";
                     return result;
@@ -43,7 +44,7 @@ namespace SqlLightest.SQLProcessors
                 lines.Add(sb.ToString());
 
                 File.WriteAllLines(path, lines);
-                result.Message = "1 Line Written";
+                result.Message = "1 Row Inserted";
             }
             catch(Exception ex)
             {
