@@ -31,10 +31,12 @@ namespace SqlLightest
                     switch (tokens[0].ToUpper())
                     {
                         case "SELECT":
+                            res = SqlEngine.ExecuteSelectQuery(tokens);
+                            ResultFormatter.Print(res);
                             break;
                         case "INSERT":
-                                res = SqlEngine.ExecuteInsertQuery(tokens);
-                                ResultFormatter.Print(res);
+                            res = SqlEngine.ExecuteInsertQuery(tokens);
+                            ResultFormatter.Print(res);
                             break;
                         case "UPDATE":
                             break;

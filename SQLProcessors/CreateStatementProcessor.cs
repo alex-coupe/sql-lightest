@@ -78,18 +78,17 @@ namespace SqlLightest.SQLProcessors
                 }
 
                 lines.Insert(index++, $"[Table {node.Name}]");
-                lines.Insert(index++, $"Cols: {node.Columns.Count}");
                 foreach (var col in node.Columns)
                 {
                     var sb = new StringBuilder();
-                    sb.Append($"{col.Name} | {col.DataType}");
+                    sb.Append($"{col.Name}|{col.DataType}");
                     if (!string.IsNullOrEmpty(col.DataTypeSize))
-                        sb.Append($"-{col.DataTypeSize}");
-                    if (col.IsPrimaryKey) sb.Append(" | PrimaryKey: True");
-                    if (col.IsForeignKey) sb.Append(" | ForeignKey: True");
-                    if (col.IsUnique) sb.Append(" | Unique: True");
-                    if (col.IsNullable) sb.Append(" | Nullable: True");
-                    if (!string.IsNullOrEmpty(col.DefaultValue)) sb.Append($" | Default: {col.DefaultValue}");
+                        sb.Append($"({col.DataTypeSize})");
+                    if (col.IsPrimaryKey) sb.Append("|PrimaryKey");
+                    if (col.ForeignKey != null) sb.Append($"|ForeignKey({col.ForeignKey.Table},{col.ForeignKey.Column})");
+                    if (col.IsUnique) sb.Append("|Unique");
+                    if (col.IsNullable) sb.Append("|Nullable");
+                    if (!string.IsNullOrEmpty(col.DefaultValue)) sb.Append($"|Default({col.DefaultValue})");
                     lines.Insert(index++,sb.ToString());
                     lines.Insert(index, Environment.NewLine);
                 }

@@ -96,5 +96,27 @@ namespace SqlLightest
 
             return res;
         }
+
+        internal static SQLResult ExecuteSelectQuery(string[] tokens)
+        {
+            var res = new SQLResult();
+            var validator = SyntaxValidator.ValidateSelectCommand(tokens);
+            if (validator.IsValid)
+            {
+                var node = SelectSyntaxTreeBuilder.BuildSelectNode(tokens);
+                if (node != null)
+                {
+                    if (node != null)
+                    {
+                        res = SelectStatementProcessor.Process(node, selectedDB);
+                    }
+                }
+            }
+            else
+            {
+                res.Message = validator.Message;
+            }
+            return res;
+        }
     }
 }

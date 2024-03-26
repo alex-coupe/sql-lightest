@@ -111,5 +111,12 @@ namespace SqlLightest
 
             return result;
         }
+
+        public static ValidationResult ValidateSelectCommand(string[] tokens)
+        {
+            ValidationResult result = new() { IsValid = true };
+
+            return result;
+        }
     }
 }

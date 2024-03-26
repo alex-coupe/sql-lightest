@@ -1,4 +1,5 @@
-﻿using SqlLightest.SyntaxNodes;
+﻿using SqlLightest.Models;
+using SqlLightest.SyntaxNodes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -127,7 +128,7 @@ namespace SqlLightest.SyntaxTreeBuilders
                                     Console.WriteLine("Cannot have nullable foreign key");
                                     return node;
                                 }
-                                col.IsForeignKey = true;
+                                //Read Foreign Key
                                 start += 2;
                             }
                             else

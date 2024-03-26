@@ -10,6 +10,7 @@ namespace SqlLightest
     {
         public string Message { get; set; } = default!;
 
-        public List<Dictionary<string,string>> ResultSet { get; set; } = [];
+        public List<string> Columns { get; set; } = [];
+        public List<List<string>> ResultSet { get; set; } = [];
     }
 }

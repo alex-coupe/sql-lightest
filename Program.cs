@@ -2,7 +2,7 @@
 {
     internal class Program
     {
-        // TODO
+        // SCOPE
         // 1.Syntax/statement validator
         // 2.INSERT
         // 3.SELECT (conditions and aggregates)

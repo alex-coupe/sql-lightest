@@ -9,10 +9,9 @@ namespace SqlLightest
 {
     public class Tokenizer
     {
-        private static readonly char[] SpecialCharacters = [',',';','(',')','\''];
         private static bool ContainsSpecialCharacter(string token)
         {
-            foreach (char c in SpecialCharacters)
+            foreach (char c in Constants.SpecialCharacters)
             {
                 if (token.Contains(c)) return true;
             }
@@ -25,7 +24,7 @@ namespace SqlLightest
             StringBuilder sb = new();
             foreach (char c in token)
             {
-                if (SpecialCharacters.Contains(c))
+                if (Constants.SpecialCharacters.Contains(c))
                 {
                     if (sb.Length > 0)
                     {
