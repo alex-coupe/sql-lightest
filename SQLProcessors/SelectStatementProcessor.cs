@@ -27,9 +27,12 @@ namespace SqlLightest.SQLProcessors
                 var table = Utilities.LoadTableDef(lines, selectNode.FromTable.ToUpper());
                 var tableData = lines.Where(x => x.StartsWith($"[Table Data {selectNode.FromTable.ToUpper()}"));
                 bool selectAllCols = selectNode.Columns.Count == 1 && selectNode.Columns.First() == "*";
-                result.Columns = selectAllCols
-                    ? table.Columns.Select(x => x.Name).ToList() 
-                    : selectNode.Columns;
+
+                if (selectAllCols)
+                {
+                    result.Columns = table.Columns.Select(x => x.Name).ToList();
+                }
+                               
                 var columnIndicies = new List<int>();
                 if (!selectAllCols)
                 {
@@ -39,6 +42,7 @@ namespace SqlLightest.SQLProcessors
                         if(index != -1)
                         {
                             columnIndicies.Add(index);
+                            result.Columns.Add(table.Columns.ElementAt(index).Name);
                         }
                     }
                 }
@@ -49,10 +53,19 @@ namespace SqlLightest.SQLProcessors
                     var payload = row[++startIndex..endIndex];
                     var payloadSplit = payload.Split(',');
                     var res = new List<string>();
-                    for (int i = 0; i< payloadSplit.Length;i++ )
+                    if (selectAllCols)
                     {
-                        if (columnIndicies.Contains(i) || selectAllCols)
-                            res.Add(payloadSplit[i].Trim());
+                        foreach( var col in payloadSplit )
+                        {
+                            res.Add(col.Trim());
+                        }
+                    }
+                    else
+                    {
+                        foreach (var index in columnIndicies)
+                        {
+                            res.Add(payloadSplit[index].Trim());
+                        }
                     }
                     result.ResultSet.Add(res);
                 }
