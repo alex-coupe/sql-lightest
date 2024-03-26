@@ -18,14 +18,14 @@ namespace SqlLightest.SQLProcessors
                 var path = $"{database}.db";
                 var lines = File.ReadAllLines(path).ToList();
 
-                var tableEntryIndex = lines.IndexOf($"[Table {selectNode.FromTable.ToUpper()}]");
+                var tableEntryIndex = lines.IndexOf($"[Table {selectNode.Table.ToUpper()}]");
                 if (tableEntryIndex == -1)
                 {
                     result.Message = "Table Does Not Exist";
                     return result;
                 }
-                var table = Utilities.LoadTableDef(lines, selectNode.FromTable.ToUpper());
-                var tableData = lines.Where(x => x.StartsWith($"[Table Data {selectNode.FromTable.ToUpper()}"));
+                var table = Utilities.LoadTableDef(lines, selectNode.Table.ToUpper());
+                var tableData = lines.Where(x => x.StartsWith($"[Table Data {selectNode.Table.ToUpper()}"));
                 bool selectAllCols = selectNode.Columns.Count == 1 && selectNode.Columns.First() == "*";
 
                 if (selectAllCols)

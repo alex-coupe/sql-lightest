@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 
 namespace SqlLightest.SyntaxNodes
 {
-    public class SelectNode
+    public class AlterNode
     {
-        public List<string> Columns = [];
         public string Table { get; set; } = default!;
-        public List<Condition> Conditions { get; set; } = [];
+
+        public Column? AddColumn { get; set; }
+        public string? DropColumn { get; set; }
+        public KeyValuePair<string, string>? RenameColumn { get; set; }
+
     }
 }

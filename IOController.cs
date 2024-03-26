@@ -27,42 +27,38 @@ namespace SqlLightest
                         break;
                     }
 
-                    SQLResult res;
+                    SQLResult res = new();
                     switch (tokens[0].ToUpper())
                     {
                         case "SELECT":
                             res = SqlEngine.ExecuteSelectQuery(tokens);
-                            ResultFormatter.Print(res);
                             break;
                         case "INSERT":
                             res = SqlEngine.ExecuteInsertQuery(tokens);
-                            ResultFormatter.Print(res);
                             break;
                         case "UPDATE":
+                            res = SqlEngine.ExecuteUpdateQuery(tokens);
                             break;
                         case "DELETE":
                             res = SqlEngine.ExecuteDeleteQuery(tokens);
-                            ResultFormatter.Print(res);
                             break;
                         case "ALTER":
+                            res = SqlEngine.ExecuteAlterQuery(tokens);
                             break;
                         case "DROP":
                             res = SqlEngine.ExecuteDropQuery(tokens);
-                            ResultFormatter.Print(res);
                             break;
                         case "CREATE":
                             res = SqlEngine.ExecuteCreateQuery(tokens);
-                            ResultFormatter.Print(res);
                             break;
                         case "USE":
                             res = SqlEngine.ExecuteUseQuery(tokens);
-                            ResultFormatter.Print(res);
                             break;
                         default:
                             Console.WriteLine("Unknown Command");
                             break;
-
                     }
+                    ResultFormatter.Print(res);
                 }
             }
         }

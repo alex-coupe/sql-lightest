@@ -23,7 +23,7 @@ namespace SqlLightest.SyntaxTreeBuilders
                 if (tokens[i] != ",")
                     selectNode.Columns.Add(tokens[i]);
             }
-            selectNode.FromTable = tokens[tableIndex];
+            selectNode.Table = tokens[tableIndex];
       
             return selectNode;
         }

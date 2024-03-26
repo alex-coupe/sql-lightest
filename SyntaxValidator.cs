@@ -125,5 +125,19 @@ namespace SqlLightest
 
             return result;
         }
+
+        public static ValidationResult ValidateUpdateCommand(string[] tokens)
+        {
+            ValidationResult result = new() { IsValid = true };
+
+            return result;
+        }
+
+        public static ValidationResult ValidateAlterCommand(string[] tokens)
+        {
+            ValidationResult result = new() { IsValid = true };
+
+            return result;
+        }
     }
 }

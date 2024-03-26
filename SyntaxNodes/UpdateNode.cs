@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace SqlLightest.SyntaxNodes
 {
-    public class SelectNode
+    public class UpdateNode
     {
-        public List<string> Columns = [];
         public string Table { get; set; } = default!;
+        public Dictionary<string, string> ColumnValues { get; set; } = [];
         public List<Condition> Conditions { get; set; } = [];
     }
 }
