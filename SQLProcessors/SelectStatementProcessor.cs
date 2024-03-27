@@ -1,4 +1,5 @@
-﻿using SqlLightest.SyntaxNodes;
+﻿using SqlLightest.Models;
+using SqlLightest.SyntaxNodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,26 +54,56 @@ namespace SqlLightest.SQLProcessors
                     var payload = row[++startIndex..endIndex];
                     var payloadSplit = payload.Split(',');
                     var res = new List<string>();
-                    if (selectAllCols)
+                    if (SatisfiesConditions(selectNode.Conditions, payloadSplit, table))
                     {
-                        foreach( var col in payloadSplit )
+                        if (selectAllCols)
                         {
-                            res.Add(col.Trim());
+                            foreach (var col in payloadSplit)
+                            {
+
+                                res.Add(col.Trim());
+
+                            }
                         }
-                    }
-                    else
-                    {
-                        foreach (var index in columnIndicies)
+                        else
                         {
-                            res.Add(payloadSplit[index].Trim());
+                            foreach (var index in columnIndicies)
+                            {
+
+                                res.Add(payloadSplit[index].Trim());
+
+                            }
                         }
+                        result.ResultSet.Add(res);
                     }
-                    result.ResultSet.Add(res);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+            }
+            return result;
+        }
+
+        private static bool SatisfiesConditions(List<Condition> conditions, string[] payloadSplit, CreateNode table)
+        {
+            var result = false;
+            foreach (var cond in conditions)
+            {
+                var index = table.Columns.FindIndex(x => x.Name.Equals(cond.LHS, StringComparison.CurrentCultureIgnoreCase));
+                if (index != -1)
+                {
+                    switch (cond.Operator)
+                    {
+                        case "=":
+                            result = payloadSplit[index].Equals(cond.RHS,StringComparison.CurrentCultureIgnoreCase);
+                            break;
+                        case "!=":
+                            result = !payloadSplit[index].Equals(cond.RHS, StringComparison.CurrentCultureIgnoreCase);
+                            break;
+      
+                    }
+                }
             }
             return result;
         }
