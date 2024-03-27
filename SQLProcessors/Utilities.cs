@@ -76,5 +76,29 @@ namespace SqlLightest.SQLProcessors
             }
             return node;
         }
+        public static bool SatisfiesConditions(List<Condition> conditions, string[] payloadSplit, CreateNode table)
+        {
+            var result = false;
+            foreach (var cond in conditions)
+            {
+                var index = table.Columns.FindIndex(x => x.Name.Equals(cond.LHS, StringComparison.CurrentCultureIgnoreCase));
+                if (index != -1)
+                {
+                    switch (cond.Operator)
+                    {
+                        case "=":
+                            result = payloadSplit[index].Equals(cond.RHS, StringComparison.CurrentCultureIgnoreCase);
+                            break;
+                        case "!=":
+                            result = !payloadSplit[index].Equals(cond.RHS, StringComparison.CurrentCultureIgnoreCase);
+                            break;
+
+                    }
+                }
+            }
+            return result;
+        }
     }
+
+    
 }

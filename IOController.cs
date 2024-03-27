@@ -42,9 +42,6 @@ namespace SqlLightest
                         case "DELETE":
                             res = SqlEngine.ExecuteDeleteQuery(tokens);
                             break;
-                        case "ALTER":
-                            res = SqlEngine.ExecuteAlterQuery(tokens);
-                            break;
                         case "DROP":
                             res = SqlEngine.ExecuteDropQuery(tokens);
                             break;

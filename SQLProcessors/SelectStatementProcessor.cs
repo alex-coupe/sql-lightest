@@ -54,24 +54,20 @@ namespace SqlLightest.SQLProcessors
                     var payload = row[++startIndex..endIndex];
                     var payloadSplit = payload.Split(',');
                     var res = new List<string>();
-                    if (SatisfiesConditions(selectNode.Conditions, payloadSplit, table))
+                    if (Utilities.SatisfiesConditions(selectNode.Conditions, payloadSplit, table) || selectNode.Conditions.Count == 0)
                     {
                         if (selectAllCols)
                         {
                             foreach (var col in payloadSplit)
                             {
-
                                 res.Add(col.Trim());
-
                             }
                         }
                         else
                         {
                             foreach (var index in columnIndicies)
-                            {
-
+                            { 
                                 res.Add(payloadSplit[index].Trim());
-
                             }
                         }
                         result.ResultSet.Add(res);
@@ -81,29 +77,6 @@ namespace SqlLightest.SQLProcessors
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-            }
-            return result;
-        }
-
-        private static bool SatisfiesConditions(List<Condition> conditions, string[] payloadSplit, CreateNode table)
-        {
-            var result = false;
-            foreach (var cond in conditions)
-            {
-                var index = table.Columns.FindIndex(x => x.Name.Equals(cond.LHS, StringComparison.CurrentCultureIgnoreCase));
-                if (index != -1)
-                {
-                    switch (cond.Operator)
-                    {
-                        case "=":
-                            result = payloadSplit[index].Equals(cond.RHS,StringComparison.CurrentCultureIgnoreCase);
-                            break;
-                        case "!=":
-                            result = !payloadSplit[index].Equals(cond.RHS, StringComparison.CurrentCultureIgnoreCase);
-                            break;
-      
-                    }
-                }
             }
             return result;
         }

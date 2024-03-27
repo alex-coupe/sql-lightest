@@ -17,20 +17,22 @@ namespace SqlLightest.SyntaxTreeBuilders
             {
                 if (tokens[i].Equals("FROM", StringComparison.CurrentCultureIgnoreCase))
                 {
+
                     tableIndex = ++i;
+                     selectNode.Table = tokens[tableIndex];
                     break;
                 }
                 if (tokens[i] != ",")
                     selectNode.Columns.Add(tokens[i]);
             }
-            selectNode.Table = tokens[tableIndex];
+           
             while (tokens[tableIndex]  != ";")
             {
                 ++tableIndex;
                 if (tokens[tableIndex].Equals("WHERE", StringComparison.CurrentCultureIgnoreCase))
                 {
                     selectNode.Conditions = SupportSyntaxTreeBuilder.BuildConditionNodes(tokens.ToList().Skip(tableIndex).ToArray());
-                    tableIndex+=3;
+                    ++tableIndex;
                 }
             }
       

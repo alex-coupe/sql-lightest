@@ -158,25 +158,5 @@ namespace SqlLightest
 
             return res;
         }
-        public static SQLResult ExecuteAlterQuery(string[] tokens)
-        {
-            var res = new SQLResult();
-            var validator = SyntaxValidator.ValidateAlterCommand(tokens);
-            if (validator.IsValid)
-            {
-                var node = AlterSyntaxTreeBuilder.BuildAlterNode(tokens);
-                if (node != null)
-                {
-                    res = AlterStatementProcessor.ProcessAltarCommand(node, selectedDB);
-                }
-            }
-            else
-            {
-                res.Message = validator.Message;
-            }
-
-            return res;
-        }
-
     }
 }
